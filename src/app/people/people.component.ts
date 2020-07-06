@@ -121,7 +121,7 @@ export class PeopleComponent implements OnInit {
     });
     let maxFreq = 0;
     let mode = 0;
-    availCounts.forEach((a, freq) => {
+    availCounts.forEach((freq, a) => {
       if (freq > maxFreq) {
         maxFreq = freq;
         mode = a;
