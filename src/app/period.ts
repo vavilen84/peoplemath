@@ -14,6 +14,7 @@
 
 import { Bucket, bucketResourcesAllocated } from "./bucket";
 import { Person } from "./person";
+import { Immutable } from './immutable';
 
 export interface SecondaryUnit {
   name: string,
@@ -35,7 +36,7 @@ export interface Period {
 /**
  * Total resources for this period which have been allocated to objectives
  */
-export function periodResourcesAllocated(period: Period): number {
+export function periodResourcesAllocated(period: Immutable<Period>): number {
   return period.buckets
       .map(bucketResourcesAllocated)
       .reduce((sum, prev) => sum + prev, 0);

@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Period } from '../period';
 import { Bucket } from '../bucket';
 import { Objective, totalResourcesAllocated, CommitmentType, objectiveResourcesAllocated } from '../objective';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-group-summary',
   templateUrl: './group-summary.component.html',
-  styleUrls: ['./group-summary.component.css']
+  styleUrls: ['./group-summary.component.css'],
+  // All inputs must be immutable
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupSummaryComponent implements OnInit {
-  @Input() period: Period;
+  @Input() period: Immutable<Period>;
   @Input() groupType: string;
   showObjectives: boolean = false;
   showByBucket: boolean = true;
@@ -65,9 +68,9 @@ export class GroupSummaryComponent implements OnInit {
     return result;
   }
 
-  allObjectivesByGroup(): Array<[string, Objective[]]> {
-    let obsByGroup = new Map<string, Objective[]>();
-    let noGroup: Objective[] = [];
+  allObjectivesByGroup(): Array<[string, Immutable<Objective>[]]> {
+    let obsByGroup = new Map<string, Immutable<Objective>[]>();
+    let noGroup: Immutable<Objective>[] = [];
     this.period.buckets.forEach(b => {
       b.objectives.forEach(o => {
         let gs = o.groups.filter(g => g.groupType == this.groupType);
@@ -88,7 +91,7 @@ export class GroupSummaryComponent implements OnInit {
     }
     noGroup.sort((o1, o2) => objectiveResourcesAllocated(o2) - objectiveResourcesAllocated(o1));
 
-    let result: Array<[string, Objective[]]> = Array.from(obsByGroup.entries());
+    let result: Array<[string, Immutable<Objective>[]]> = Array.from(obsByGroup.entries());
     result.sort(([g1, obs1], [g2, obs2]) =>
       (totalResourcesAllocated(obs2) - totalResourcesAllocated(obs1)) || g1.localeCompare(g2));
     if (noGroup.length > 0) {

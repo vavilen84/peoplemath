@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { Assignment } from "./assignment";
+import { Immutable } from './immutable';
 
 export enum CommitmentType { Aspirational = "Aspirational", Committed = "Committed" }
 
@@ -39,7 +40,7 @@ export interface Objective {
  * Sum of resources allocated to the given objective.
  * Not a member function to avoid problems with (de)serialization.
  */
-export function objectiveResourcesAllocated(objective: Objective): number {
+export function objectiveResourcesAllocated(objective: Immutable<Objective>): number {
   return objective.assignments
     .map(assignment => assignment.commitment)
     .reduce((sum, current) => sum + current, 0);
@@ -48,6 +49,6 @@ export function objectiveResourcesAllocated(objective: Objective): number {
 /**
  * Sum of resources allocated to a number of objectives.
  */
-export function totalResourcesAllocated(objectives: Objective[]): number {
+export function totalResourcesAllocated(objectives: Immutable<Objective>[]): number {
   return objectives.reduce((sum, ob) => sum + objectiveResourcesAllocated(ob), 0);
 }

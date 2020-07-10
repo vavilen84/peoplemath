@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Bucket } from '../bucket';
 import { Objective, CommitmentType, objectiveResourcesAllocated } from '../objective';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-bucket-summary',
   templateUrl: './bucket-summary.component.html',
-  styleUrls: ['./bucket-summary.component.css']
+  styleUrls: ['./bucket-summary.component.css'],
+  // All inputs must be immutable
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BucketSummaryComponent implements OnInit {
-  @Input() bucket: Bucket;
+  @Input() bucket: Immutable<Bucket>;
   @Input() bucketAllocationFraction: number;
   @Input() unit: string;
 
@@ -37,7 +40,7 @@ export class BucketSummaryComponent implements OnInit {
     return this.committedObjectives().length > 0;
   }
 
-  committedObjectives(): Objective[] {
+  committedObjectives(): Immutable<Objective>[] {
     return this.bucket.objectives.filter(
       o => o.commitmentType == CommitmentType.Committed &&
       objectiveResourcesAllocated(o) > 0);
@@ -47,7 +50,7 @@ export class BucketSummaryComponent implements OnInit {
     return this.aspirationalObjectives().length > 0;
   }
 
-  aspirationalObjectives(): Objective[] {
+  aspirationalObjectives(): Immutable<Objective>[] {
     return this.bucket.objectives.filter(
       o => o.commitmentType != CommitmentType.Committed &&
       objectiveResourcesAllocated(o) > 0);
@@ -57,7 +60,7 @@ export class BucketSummaryComponent implements OnInit {
     return this.rejectedObjectives().length > 0;
   }
 
-  rejectedObjectives(): Objective[] {
+  rejectedObjectives(): Immutable<Objective>[] {
     return this.bucket.objectives.filter(o => objectiveResourcesAllocated(o) <= 0);
   }
 }

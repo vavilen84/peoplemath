@@ -23,15 +23,17 @@ import { of } from 'rxjs';
 import { Team } from '../team';
 import { Bucket, bucketResourcesAllocated } from '../bucket';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-period-summary',
   templateUrl: './period-summary.component.html',
-  styleUrls: ['./period-summary.component.css']
+  styleUrls: ['./period-summary.component.css'],
+  // This can't use ChangeDetectionStrategy.OnPush as it changes its own state
 })
 export class PeriodSummaryComponent implements OnInit {
-  team: Team;
-  period: Period;
+  team: Immutable<Team>;
+  period: Immutable<Period>;
 
   constructor(
     private storage: StorageService,

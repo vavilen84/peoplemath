@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Objective, objectiveResourcesAllocated, CommitmentType } from '../objective';
 import { SecondaryUnit } from '../period';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-objective-summary',
   templateUrl: './objective-summary.component.html',
-  styleUrls: ['./objective-summary.component.css']
+  styleUrls: ['./objective-summary.component.css'],
+  // All inputs must be immutable
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ObjectiveSummaryComponent implements OnInit {
-  @Input() objective: Objective;
+  @Input() objective: Immutable<Objective>;
   @Input() unit: string;
-  @Input() secondaryUnits: SecondaryUnit[];
+  @Input() secondaryUnits: readonly Immutable<SecondaryUnit>[];
 
   constructor() { }
 
