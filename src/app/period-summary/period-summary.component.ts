@@ -32,8 +32,8 @@ import { Immutable } from '../immutable';
   // This can't use ChangeDetectionStrategy.OnPush as it changes its own state
 })
 export class PeriodSummaryComponent implements OnInit {
-  team: Immutable<Team>;
-  period: Immutable<Period>;
+  team?: Immutable<Team>;
+  period?: Immutable<Period>;
 
   constructor(
     private storage: StorageService,
@@ -42,17 +42,23 @@ export class PeriodSummaryComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.route.paramMap.subscribe(m => this.loadDataFor(m.get('team'), m.get('period')));
+    this.route.paramMap.subscribe(m => {
+      const teamId = m.get('team');
+      const periodId = m.get('period');
+      if (teamId && periodId) {
+        this.loadDataFor(teamId, periodId);
+      }
+    });
   }
 
-  bucketAllocationFraction(bucket: Bucket): number {
-    const total = periodResourcesAllocated(this.period);
+  bucketAllocationFraction(bucket: Immutable<Bucket>): number {
+    const total = periodResourcesAllocated(this.period!);
     return (total == 0) ? 0 : bucketResourcesAllocated(bucket) / total;
   }
 
   allGroupTypes(): string[] {
     let groupTypes = new Set<string>();
-    this.period.buckets.forEach(b => {
+    this.period!.buckets.forEach(b => {
       b.objectives.forEach(o => {
         o.groups.forEach(g => {
           groupTypes.add(g.groupType);
@@ -66,7 +72,7 @@ export class PeriodSummaryComponent implements OnInit {
 
   allTags(): string[] {
     let tags = new Set<string>();
-    this.period.buckets.forEach(b => {
+    this.period!.buckets.forEach(b => {
       b.objectives.forEach(o => {
         o.tags.forEach(t => tags.add(t.name));
       });

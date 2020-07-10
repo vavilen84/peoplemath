@@ -27,9 +27,9 @@ import { Immutable } from '../immutable';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BucketSummaryComponent implements OnInit {
-  @Input() bucket: Immutable<Bucket>;
-  @Input() bucketAllocationFraction: number;
-  @Input() unit: string;
+  @Input() bucket?: Immutable<Bucket>;
+  @Input() bucketAllocationFraction?: number;
+  @Input() unit?: string;
 
   constructor() { }
 
@@ -41,7 +41,7 @@ export class BucketSummaryComponent implements OnInit {
   }
 
   committedObjectives(): Immutable<Objective>[] {
-    return this.bucket.objectives.filter(
+    return this.bucket!.objectives.filter(
       o => o.commitmentType == CommitmentType.Committed &&
       objectiveResourcesAllocated(o) > 0);
   }
@@ -51,7 +51,7 @@ export class BucketSummaryComponent implements OnInit {
   }
 
   aspirationalObjectives(): Immutable<Objective>[] {
-    return this.bucket.objectives.filter(
+    return this.bucket!.objectives.filter(
       o => o.commitmentType != CommitmentType.Committed &&
       objectiveResourcesAllocated(o) > 0);
   }
@@ -61,6 +61,6 @@ export class BucketSummaryComponent implements OnInit {
   }
 
   rejectedObjectives(): Immutable<Objective>[] {
-    return this.bucket.objectives.filter(o => objectiveResourcesAllocated(o) <= 0);
+    return this.bucket!.objectives.filter(o => objectiveResourcesAllocated(o) <= 0);
   }
 }

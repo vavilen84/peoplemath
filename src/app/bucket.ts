@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { Objective, objectiveResourcesAllocated, CommitmentType } from "./objective";
+import { Immutable } from './immutable';
 
 export class Bucket {
   constructor(
@@ -26,7 +27,7 @@ export class Bucket {
  * Sum of resources allocated to the bucket.
  * Not a member function to avoid problems with JSON (de)serialization.
  */
-export function bucketResourcesAllocated(bucket: Bucket): number {
+export function bucketResourcesAllocated(bucket: Immutable<Bucket>): number {
   return bucket.objectives
     .map(objectiveResourcesAllocated)
     .reduce((sum, current) => sum + current, 0);

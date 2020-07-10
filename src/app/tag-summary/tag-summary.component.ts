@@ -27,8 +27,8 @@ import { Immutable } from '../immutable';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TagSummaryComponent implements OnInit {
-  @Input() period: Immutable<Period>;
-  @Input() tag: string;
+  @Input() period?: Immutable<Period>;
+  @Input() tag?: string;
 
   constructor() { }
 
@@ -37,9 +37,9 @@ export class TagSummaryComponent implements OnInit {
 
   taggedObjectives(): Immutable<Objective>[] {
     let result: Immutable<Objective>[] = [];
-    this.period.buckets.forEach(b => {
+    this.period!.buckets.forEach(b => {
       b.objectives.forEach(o => {
-        if (o.tags.map(t => t.name).includes(this.tag)) {
+        if (o.tags.map(t => t.name).includes(this.tag!)) {
           result.push(o);
         }
       });

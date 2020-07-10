@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { SecondaryUnit } from '../period';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-resource-quantity',
   templateUrl: './resource-quantity.component.html',
-  styleUrls: ['./resource-quantity.component.css']
+  styleUrls: ['./resource-quantity.component.css'],
+  // TODO: Uncomment this when all parent components are guaranteed to respect immutability
+  //changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResourceQuantityComponent implements OnInit {
-  @Input() quantity: number;
+  @Input() quantity?: number;
   @Input() ofQuantity?: number;
-  @Input() primaryUnit: string;
-  @Input() secondaryUnits: SecondaryUnit[];
+  @Input() primaryUnit?: string;
+  @Input() secondaryUnits?: readonly Immutable<SecondaryUnit>[];
 
   constructor() { }
 

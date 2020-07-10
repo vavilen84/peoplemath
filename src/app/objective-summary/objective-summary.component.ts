@@ -27,9 +27,9 @@ import { Immutable } from '../immutable';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ObjectiveSummaryComponent implements OnInit {
-  @Input() objective: Immutable<Objective>;
-  @Input() unit: string;
-  @Input() secondaryUnits: readonly Immutable<SecondaryUnit>[];
+  @Input() objective?: Immutable<Objective>;
+  @Input() unit?: string;
+  @Input() secondaryUnits?: readonly Immutable<SecondaryUnit>[];
 
   constructor() { }
 
@@ -37,14 +37,14 @@ export class ObjectiveSummaryComponent implements OnInit {
   }
 
   allocatedResources(): number {
-    return objectiveResourcesAllocated(this.objective);
+    return objectiveResourcesAllocated(this.objective!);
   }
 
   allocationSummary(): string {
     if (this.isRejected()) {
-      return this.objective.resourceEstimate + '';
+      return this.objective!.resourceEstimate + '';
     } else if (this.isPartiallyAllocated()) {
-      return this.allocatedResources() + ' of ' + this.objective.resourceEstimate;
+      return this.allocatedResources() + ' of ' + this.objective!.resourceEstimate;
     } else {
       return this.allocatedResources() + '';
     }
@@ -55,11 +55,11 @@ export class ObjectiveSummaryComponent implements OnInit {
   }
 
   isPartiallyAllocated(): boolean {
-    return !this.isRejected() && this.allocatedResources() < this.objective.resourceEstimate;
+    return !this.isRejected() && this.allocatedResources() < this.objective!.resourceEstimate;
   }
 
   isCommittedAndFullyAllocated(): boolean {
-    return this.objective.commitmentType == CommitmentType.Committed &&
-      this.allocatedResources() >= this.objective.resourceEstimate;
+    return this.objective!.commitmentType == CommitmentType.Committed &&
+      this.allocatedResources() >= this.objective!.resourceEstimate;
   }
 }

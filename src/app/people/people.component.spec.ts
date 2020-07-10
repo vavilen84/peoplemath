@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,11 +38,33 @@ describe('PeopleComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(PeopleComponent);
     component = fixture.componentInstance;
-    component.people = [];
+    component.people = [
+      {
+        id: 'p1',
+        displayName: 'Person 1',
+        availability: 6,
+      },
+      {
+        id: 'p2',
+        displayName: 'Person 2',
+        availability: 5,
+      },
+      {
+        id: 'p3',
+        displayName: 'Person 3',
+        availability: 6,
+      }
+    ];
+    component.peopleAllocations = new Map();
+    component.peopleAssignmentCounts = new Map();
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should calculate default availability correctly', () => {
+    expect(component.defaultPersonAvailability()).toEqual(6);
   });
 });

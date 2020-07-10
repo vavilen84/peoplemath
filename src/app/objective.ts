@@ -29,7 +29,7 @@ export interface ObjectiveTag {
 export interface Objective {
   name: string,
   resourceEstimate: number,
-  commitmentType: CommitmentType,
+  commitmentType?: CommitmentType,
   notes: string,
   groups: ObjectiveGroup[],
   tags: ObjectiveTag[],
@@ -49,6 +49,6 @@ export function objectiveResourcesAllocated(objective: Immutable<Objective>): nu
 /**
  * Sum of resources allocated to a number of objectives.
  */
-export function totalResourcesAllocated(objectives: Immutable<Objective>[]): number {
+export function totalResourcesAllocated(objectives: readonly Immutable<Objective>[]): number {
   return objectives.reduce((sum, ob) => sum + objectiveResourcesAllocated(ob), 0);
 }
