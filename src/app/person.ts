@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,26 @@ export class Person {
         public displayName: string,
         public availability: number,
     ) {}
+}
+
+export class ImmutablePerson {
+    private readonly _id: string;
+    private readonly _displayName: string;
+    private readonly _availability: number;
+
+    get id(): string { return this._id }
+    get displayName(): string { return this._displayName }
+    get availability(): number { return this._availability }
+
+    constructor(person: Person) {
+        this._id = person.id;
+        this._displayName = person.displayName;
+        this._availability = person.availability;
+    }
+
+    toOriginal(): Person {
+        return new Person(this.id, this.displayName, this.availability);
+    }
 }
 
 export function personDisplayNameWithUsername(person: Person): string {
