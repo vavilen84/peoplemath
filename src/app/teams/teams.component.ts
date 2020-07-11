@@ -20,6 +20,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditTeamDialogComponent, EditTeamDialogData } from '../edit-team-dialog/edit-team-dialog.component';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-teams',
@@ -27,7 +28,7 @@ import { of } from 'rxjs';
   styleUrls: ['./teams.component.css']
 })
 export class TeamsComponent implements OnInit {
-  teams?: Team[];
+  teams?: readonly Immutable<Team>[];
 
   constructor(
     private storage: StorageService,
@@ -55,14 +56,14 @@ export class TeamsComponent implements OnInit {
 
   addTeam(): void {
     const dialogData: EditTeamDialogData = {
-      team: new Team('', ''),
+      team: {id: '', displayName: ''},
       title: 'Add Team',
       okAction: 'Add',
       allowCancel: true,
       allowEditID: true,
     };
     const dialogRef = this.dialog.open(EditTeamDialogComponent, {data: dialogData});
-    dialogRef.afterClosed().subscribe(team => {
+    dialogRef.afterClosed().subscribe((team?: Team) => {
       if (!team) {
         return;
       }
@@ -74,7 +75,7 @@ export class TeamsComponent implements OnInit {
         }),
       ).subscribe(res => {
         if (res != "error") {
-          this.teams!.push(team);
+          this.teams = this.teams!.concat([team]);
         }
       });
     });

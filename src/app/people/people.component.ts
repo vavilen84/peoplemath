@@ -18,6 +18,7 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { FormControl, ValidatorFn, AbstractControl, Validators } from '@angular/forms';
+import { Immutable } from '../immutable';
 
 class PersonData {
   constructor(
@@ -38,10 +39,10 @@ class PersonData {
   styleUrls: ['./people.component.css']
 })
 export class PeopleComponent implements OnInit {
-  @Input() people?: Person[];
-  @Input() peopleAllocations?: Map<string, number>;
-  @Input() peopleCommittedAllocations?: Map<string, number>;
-  @Input() peopleAssignmentCounts?: Map<string, number>;
+  @Input() people?: readonly Immutable<Person>[];
+  @Input() peopleAllocations?: ReadonlyMap<string, number>;
+  @Input() peopleCommittedAllocations?: ReadonlyMap<string, number>;
+  @Input() peopleAssignmentCounts?: ReadonlyMap<string, number>;
   @Input() totalAvailable?: number;
   @Input() totalAllocated?: number;
   @Input() totalUnallocated?: number;
@@ -142,36 +143,37 @@ export class PeopleComponent implements OnInit {
       allowUsernameEdit: true, onDelete: undefined,
     };
     const dialogRef = this.dialog.open(EditPersonDialog, {data: dialogData});
-    dialogRef.afterClosed().subscribe(ok => {
-      if (ok) {
-        this.people!.push(person);
-        this.people!.sort((a,b) => a.id < b.id ? -1 : (a.id > b.id ? 1 : 0));
-        this.onChanged.emit(person);
+    dialogRef.afterClosed().subscribe((newPerson?: Immutable<Person>) => {
+      if (newPerson) {
+        let newPeople: Immutable<Person>[] = [...this.people!, person];
+        newPeople.sort((a,b) => a.id < b.id ? -1 : (a.id > b.id ? 1 : 0));
+        this.onChanged.emit(newPeople);
       }
     });
   }
 
-  editPerson(p: Person): void {
-    if (!this.isEditingEnabled || !p) {
+  editPerson(person: Person): void {
+    if (!this.isEditingEnabled || !person) {
       return;
     }
     const dialogData: EditPersonDialogData = {
-      person: p, unit: this.unit!, title: 'Edit person "' + p.id + '"', okAction: "OK",
+      person: person, unit: this.unit!, title: 'Edit person "' + person.id + '"', okAction: "OK",
       existingUserIDs: [], // Doesn't matter for existing people
       allowCancel: false, allowDelete: true, showDeleteConfirm: false,
       allowUsernameEdit: false, onDelete: this.onDelete,
     };
     const dialogRef = this.dialog.open(EditPersonDialog, {data: dialogData});
-    dialogRef.afterClosed().subscribe(ok => {
-      if (ok) {
-        this.onChanged.emit(p);
+    dialogRef.afterClosed().subscribe((newPerson?: Immutable<Person>) => {
+      if (newPerson) {
+        let newPeople: Immutable<Person>[] = this.people!.map(p => (p === person) ? newPerson : p);
+        this.onChanged.emit(newPeople);
       }
     });
   }
 }
 
 export interface EditPersonDialogData {
-  person: Person;
+  person: Immutable<Person>;
   unit: string;
   title: string;
   okAction: string;
@@ -215,14 +217,16 @@ export class EditPersonDialog {
   }
 
   onOK(): void {
-    this.data.person.id = this.userIdControl.value;
-    this.data.person.displayName = this.displayNameControl.value;
-    this.data.person.availability = this.availabilityControl.value;
-    this.dialogRef.close(true);
+    const newPerson: Immutable<Person> = {
+      id: this.userIdControl.value,
+      displayName: this.displayNameControl.value,
+      availability: this.availabilityControl.value,
+    };
+    this.dialogRef.close(newPerson);
   }
 
   onCancel(): void {
-    this.dialogRef.close(false);
+    this.dialogRef.close();
   }
 
   delete(): void {

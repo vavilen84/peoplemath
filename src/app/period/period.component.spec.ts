@@ -34,7 +34,7 @@ describe('PeriodComponent', () => {
   let component: PeriodComponent;
   let fixture: ComponentFixture<PeriodComponent>;
   let storageServiceSpy = jasmine.createSpyObj('StorageService', ['getTeam', 'getPeriod']);
-  let TEST_TEAM = new Team('testTeam', 'My test team');
+  let TEST_TEAM: Team = {id: 'testTeam', displayName: 'My test team'};
   let TEST_PERIOD: Period = {
     id: 'testPeriod',
     displayName: 'My test period',
@@ -86,7 +86,7 @@ describe('PeriodComponent', () => {
 
   it('should only rename groups of the same group type', () => {
     component.period = TEST_PERIOD;
-    component.period.buckets.push({
+    component.period = {...component.period, buckets: component.period.buckets.concat([{
       allocationPercentage: 100,
       displayName: 'Sole bucket',
       objectives: [
@@ -103,7 +103,7 @@ describe('PeriodComponent', () => {
           ],
         },
       ],
-    });
+    }])};
     component.renameGroup('type1', 'thename', 'thenewname');
     expect(component.period.buckets[0].objectives[0].groups).toEqual([
       {groupType: 'type1', groupName: 'thenewname'},

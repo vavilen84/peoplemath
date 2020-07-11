@@ -18,7 +18,6 @@ import { EditTeamDialogComponent, EditTeamDialogData } from './edit-team-dialog.
 import { MaterialModule } from '../material/material.module';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Team } from '../team';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('EditTeamDialogComponent', () => {
@@ -26,7 +25,7 @@ describe('EditTeamDialogComponent', () => {
   let fixture: ComponentFixture<EditTeamDialogComponent>;
   let dialogSpy = jasmine.createSpyObj('MatDialogRef', ['open']);
   let DIALOG_DATA: EditTeamDialogData = {
-    team: new Team('test', 'My test team'),
+    team: {id: 'test', displayName: 'My test team'},
     title: 'My test title',
     okAction: 'OK',
     allowCancel: true,

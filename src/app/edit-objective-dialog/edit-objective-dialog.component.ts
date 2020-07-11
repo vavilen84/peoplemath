@@ -17,6 +17,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Objective, CommitmentType, ObjectiveGroup, ObjectiveTag } from '../objective';
 import { Bucket } from '../bucket';
 import { Assignment } from '../assignment';
+import { Immutable } from '../immutable';
 
 export interface EditedObjective {
   name: string;
@@ -25,21 +26,21 @@ export interface EditedObjective {
   groups: string;
   tags: string;
   notes: string;
-  assignments: Assignment[],
+  assignments: readonly Immutable<Assignment>[];
 }
 
 export interface EditObjectiveDialogData {
   objective: EditedObjective;
-  original?: Objective;
+  original?: Immutable<Objective>;
   title: string;
   okAction: string;
   unit: string;
-  otherBuckets: Bucket[];
-  onMoveBucket?: EventEmitter<[Objective, Objective, Bucket]>;
-  onDelete?: EventEmitter<Objective>;
+  otherBuckets: readonly Immutable<Bucket>[];
+  onMoveBucket?: EventEmitter<[Immutable<Objective>, Immutable<Objective>, Immutable<Bucket>]>;
+  onDelete?: EventEmitter<Immutable<Objective>>;
 }
 
-export function makeEditedObjective(objective: Objective): EditedObjective {
+export function makeEditedObjective(objective: Immutable<Objective>): EditedObjective {
   let groupsStr = objective.groups.map(g => g.groupType + ":" + g.groupName).join(",");
   let tagsStr = objective.tags.map(t => t.name).join(",");
 
@@ -82,7 +83,7 @@ export function makeTags(tagsStr: string): ObjectiveTag[] {
   });
 }
 
-function makeObjective(edited: EditedObjective): Objective {
+function makeObjective(edited: EditedObjective): Immutable<Objective> {
   return {
     name: edited.name,
     resourceEstimate: edited.resourceEstimate,
@@ -122,7 +123,7 @@ export class EditObjectiveDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  onMove(newBucket: Bucket): void {
+  onMove(newBucket: Immutable<Bucket>): void {
     let newObjective = makeObjective(this.data.objective);
     this.data.onMoveBucket!.emit([this.data.original!, newObjective, newBucket]);
     this.dialogRef.close();

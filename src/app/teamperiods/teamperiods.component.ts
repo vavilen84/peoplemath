@@ -27,6 +27,8 @@ import { AddPeriodDialogData, AddPeriodDialogComponent, CreateMethod } from '../
 import { Bucket } from '../bucket';
 import { Person } from '../person';
 import { Assignment } from '../assignment';
+import { Immutable } from '../immutable';
+import { Objective } from '../objective';
 
 const DEFAULT_MAX_COMMITTED_PERCENTAGE = 50;
 
@@ -36,8 +38,8 @@ const DEFAULT_MAX_COMMITTED_PERCENTAGE = 50;
   styleUrls: ['./teamperiods.component.css']
 })
 export class TeamPeriodsComponent implements OnInit {
-  team?: Team;
-  periods?: Period[];
+  team?: Immutable<Team>;
+  periods?: readonly Immutable<Period>[];
 
   constructor(
     private storage: StorageService,
@@ -62,7 +64,8 @@ export class TeamPeriodsComponent implements OnInit {
       catchError(error => {
         this.snackBar.open('Could not load team "' + teamId + '": ' + error.error, 'Dismiss');
         console.log(error);
-        return of(new Team('', ''));
+        let t: Team = {id: '', displayName: ''};
+        return of(t);
       })
     ).subscribe(team => this.team = team);
 
@@ -79,7 +82,7 @@ export class TeamPeriodsComponent implements OnInit {
     return this.team != undefined && this.periods != undefined;
   }
 
-  sortedPeriods(): Period[] {
+  sortedPeriods(): Immutable<Period>[] {
     let result = this.periods!.slice();
     result.sort((a, b) => a.displayName < b.displayName ? 1 : (a.displayName > b.displayName ? -1 : 0));
     return result;
@@ -113,11 +116,11 @@ export class TeamPeriodsComponent implements OnInit {
       copyAssignments: false,
     };
     const dialogRef = this.dialog.open(AddPeriodDialogComponent, {data: dialogData});
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed().subscribe((data?: AddPeriodDialogData) => {
       if (!data) {
         return;
       }
-      var newPeriod: Period;
+      var newPeriod: Immutable<Period>;
       if (data.createMethod == CreateMethod.Blank) {
         newPeriod = data.period;
       } else if (data.createMethod == CreateMethod.Copy) {
@@ -153,10 +156,10 @@ export class TeamPeriodsComponent implements OnInit {
     return result;
   }
 
-  copyBuckets(orig: Bucket[], copyObjectives: boolean, copyAssignments: boolean): Bucket[] {
-    let result = [];
+  copyBuckets(orig: readonly Immutable<Bucket>[], copyObjectives: boolean, copyAssignments: boolean): Immutable<Bucket>[] {
+    let result: Immutable<Bucket>[] = [];
     for (let b of orig) {
-      let objectives = [];
+      let objectives: Immutable<Objective>[] = [];
       if (copyObjectives) {
         for (let o of b.objectives) {
           let assignments = [];
@@ -176,7 +179,7 @@ export class TeamPeriodsComponent implements OnInit {
           });
         }
       }
-      result.push(new Bucket(b.displayName, b.allocationPercentage, objectives));
+      result.push({displayName: b.displayName, allocationPercentage: b.allocationPercentage, objectives: objectives});
     }
     return result;
   }
@@ -206,7 +209,7 @@ export class TeamPeriodsComponent implements OnInit {
     });
   }
 
-  storeNewPeriod(period: Period): void {
+  storeNewPeriod(period: Immutable<Period>): void {
     this.storage.addPeriod(this.team!.id, period).pipe(
       catchError(error => {
         this.snackBar.open('Could not save new period: ' + error.error, 'Dismiss');
@@ -215,8 +218,7 @@ export class TeamPeriodsComponent implements OnInit {
       })
     ).subscribe(updateResponse => {
       if (updateResponse) {
-        period.lastUpdateUUID = updateResponse.lastUpdateUUID;
-        this.periods!.push(period);
+        this.periods = this.periods!.concat([{...period, lastUpdateUUID: updateResponse.lastUpdateUUID}]);
       }
     });
   }

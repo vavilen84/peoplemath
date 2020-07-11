@@ -18,6 +18,7 @@ import { Period } from './period';
 import { Observable, of } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ObjectUpdateResponse } from './objectupdateresponse';
+import { Immutable } from './immutable';
 
 @Injectable()
 export class StorageService {
@@ -50,12 +51,12 @@ export class StorageService {
     return this.http.get<Period>('/api/period/' + teamId + '/' + periodId);
   }
 
-  addPeriod(teamId: string, period: Period): Observable<ObjectUpdateResponse> {
+  addPeriod(teamId: string, period: Immutable<Period>): Observable<ObjectUpdateResponse> {
     let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})};
     return this.http.post<ObjectUpdateResponse>('/api/period/' + teamId + '/', period, options);
   }
 
-  updatePeriod(teamId: string, period: Period): Observable<ObjectUpdateResponse> {
+  updatePeriod(teamId: string, period: Immutable<Period>): Observable<ObjectUpdateResponse> {
     let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})};
     return this.http.put<ObjectUpdateResponse>('/api/period/' + teamId + '/' + period.id, period, options);
   }

@@ -18,7 +18,6 @@ import { EditBucketDialogComponent, EditBucketDialogData } from './edit-bucket-d
 import { MaterialModule } from '../material/material.module';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Bucket } from '../bucket';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('EditBucketDialogComponent', () => {
@@ -26,7 +25,7 @@ describe('EditBucketDialogComponent', () => {
   let fixture: ComponentFixture<EditBucketDialogComponent>;
   let dialogSpy = jasmine.createSpyObj('MatDialogRef', ['open']);
   let DIALOG_DATA: EditBucketDialogData = {
-    bucket: new Bucket('My test bucket', 76, []),
+    bucket: {displayName: 'My test bucket', allocationPercentage: 76, objectives: []},
     okAction: 'OK',
     allowCancel: true,
     title: 'My test dialog',

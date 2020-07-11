@@ -26,7 +26,7 @@ describe('TeamPeriodsComponent', () => {
   let component: TeamPeriodsComponent;
   let fixture: ComponentFixture<TeamPeriodsComponent>;
   let storageServiceSpy = jasmine.createSpyObj('StorageService', ['getTeam', 'getPeriods']);
-  let TEST_TEAM = new Team('testTeam', 'My test team');
+  let TEST_TEAM: Team = {id: 'testTeam', displayName: 'My test team'};
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

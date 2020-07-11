@@ -12,19 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Period } from '../period';
 import { Objective, CommitmentType } from '../objective';
 import { Assignment } from '../assignment';
 import { Person, personDisplayNameWithUsername } from '../person';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-assignments-by-person',
   templateUrl: './assignments-by-person.component.html',
-  styleUrls: ['./assignments-by-person.component.css']
+  styleUrls: ['./assignments-by-person.component.css'],
+  // All inputs must be immutable
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssignmentsByPersonComponent implements OnInit {
-  @Input() period?: Period;
+  @Input() period?: Immutable<Period>;
 
   constructor() { }
 
@@ -74,7 +77,7 @@ export class AssignmentsByPersonComponent implements OnInit {
 
 class ObjectiveAssignment {
   constructor(
-    public objective: Objective,
-    public assignment: Assignment,
+    public objective: Immutable<Objective>,
+    public assignment: Immutable<Assignment>,
   ) {}
 }

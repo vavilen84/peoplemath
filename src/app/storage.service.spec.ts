@@ -57,7 +57,7 @@ describe('StorageService', () => {
   });
 
   it('should be able to POST a team', () => {
-    const team = new Team('testteam', 'Test team');
+    const team: Team = {id: 'testteam', displayName: 'Test team'};
     const response = '';
     service.addTeam(team).subscribe(data => expect(data).toEqual(response));
 
@@ -71,7 +71,7 @@ describe('StorageService', () => {
   });
 
   it('should be able to PUT a team', () => {
-    const team = new Team('testteam', 'Test team');
+    const team: Team = {id: 'testteam', displayName: 'Test team'};
     const response = '';
     service.updateTeam(team).subscribe(data => expect(data).toEqual(response));
 
@@ -85,7 +85,7 @@ describe('StorageService', () => {
   });
 
   it('should be able to GET a team', () => {
-    const team = new Team('testteam', 'Test team');
+    const team: Team = {id: 'testteam', displayName: 'Test team'};
     service.getTeam('testteam').subscribe(data => expect(data).toEqual(team));
 
     const req = httpTestingController.expectOne('/api/team/testteam');
@@ -96,7 +96,10 @@ describe('StorageService', () => {
   });
 
   it('should be able to GET all teams', () => {
-    const teams = [new Team('team1', 'Team 1'), new Team('team2', 'Team 2')];
+    const teams: Team[] = [
+      {id: 'team1', displayName: 'Team 1'},
+      {id: 'team2', displayName: 'Team 2'},
+    ];
     service.getTeams().subscribe(data => expect(data).toEqual(teams));
 
     const req = httpTestingController.expectOne('/api/team/');

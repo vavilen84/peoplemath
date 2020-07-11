@@ -31,7 +31,7 @@ import { Assignment } from '../assignment';
 import { BucketSummaryComponent } from '../bucket-summary/bucket-summary.component';
 import { ResourceQuantityComponent } from '../resource-quantity/resource-quantity.component';
 
-let TEST_TEAM = new Team('teamid', 'Team Name');
+let TEST_TEAM: Team = {id: 'teamid', displayName: 'Team Name'};
 let NO_COMMITMENTTYPE_OBJECTIVE: Objective = {
   name: 'An objective with no commitment type',
   resourceEstimate: 10,
@@ -43,9 +43,9 @@ let NO_COMMITMENTTYPE_OBJECTIVE: Objective = {
     new Assignment('person1', 5),
   ],
 };
-let BUCKETS = [new Bucket('Bucket 1', 100, [
+let BUCKETS: Bucket[] = [{displayName: 'Bucket 1', allocationPercentage: 100, objectives: [
   NO_COMMITMENTTYPE_OBJECTIVE,
-])];
+]}];
 let TEST_PERIOD: Period = {
   id: 'periodid',
   displayName: 'Period Name',

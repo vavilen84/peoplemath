@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Objective, CommitmentType } from '../objective';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-assignment',
   templateUrl: './assignment.component.html',
-  styleUrls: ['./assignment.component.css']
+  styleUrls: ['./assignment.component.css'],
+  // All inputs must be immutable
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssignmentComponent implements OnInit {
-  @Input() objective?: Objective;
+  @Input() objective?: Immutable<Objective>;
   @Input() assignedResources?: number;
   @Input() unit?: string;
 

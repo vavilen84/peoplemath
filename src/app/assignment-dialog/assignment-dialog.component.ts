@@ -15,6 +15,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Objective } from '../objective';
+import { Immutable } from '../immutable';
 
 export class PersonAssignmentData {
   constructor(
@@ -24,7 +25,7 @@ export class PersonAssignmentData {
 }
 
 export interface AssignmentDialogData {
-  objective: Objective;
+  objective: Immutable<Objective>;
   people: PersonAssignmentData[];
   unit: string;
   columns: string[];

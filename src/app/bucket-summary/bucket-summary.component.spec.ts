@@ -38,7 +38,7 @@ describe('BucketSummaryComponent', () => {
       new Assignment('person1', 5),
     ],
   };
-  let BUCKET: Bucket = new Bucket('my bucket', 50, [NO_COMMITMENTTYPE_OBJECTIVE]);
+  let BUCKET: Bucket = {displayName: 'my bucket', allocationPercentage: 50, objectives: [NO_COMMITMENTTYPE_OBJECTIVE]};
   
   beforeEach(async(() => {
     TestBed.configureTestingModule({

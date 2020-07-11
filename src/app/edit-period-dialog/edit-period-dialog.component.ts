@@ -16,9 +16,10 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { Period, SecondaryUnit } from '../period';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormControl, Validators } from '@angular/forms';
+import { Immutable } from '../immutable';
 
 export interface EditPeriodDialogData {
-  period: Period;
+  period: Immutable<Period>;
   okAction: string;
   allowEditID: boolean;
   title: string;
@@ -71,20 +72,20 @@ export class EditPeriodDialogComponent implements OnInit {
   }
 
   onOK(): void {
-    if (this.data.allowEditID) {
-      this.data.period.id = this.periodIdControl.value;
-    }
-    this.data.period.displayName = this.displayNameControl.value;
-    this.data.period.unit = this.unitControl.value;
-    let secondaryUnits: SecondaryUnit[] = this.parseSecondaryUnits();
-    this.data.period.secondaryUnits = secondaryUnits;
-    this.data.period.notesURL = this.notesUrlControl.value;
-    this.data.period.maxCommittedPercentage = this.maxCommitPctControl.value;
-    this.dialogRef.close(true);
+    let newPeriod: Immutable<Period> = {
+      ...this.data.period,
+      id: this.data.allowEditID ? this.periodIdControl.value : this.data.period.id,
+      displayName: this.displayNameControl.value,
+      unit: this.unitControl.value,
+      secondaryUnits: this.parseSecondaryUnits(),
+      notesURL: this.notesUrlControl.value,
+      maxCommittedPercentage: this.maxCommitPctControl.value,
+    };
+    this.dialogRef.close(newPeriod);
   }
 
   onCancel(): void {
-    this.dialogRef.close(false);
+    this.dialogRef.close();
   }
 
   isDataValid(): boolean {

@@ -40,7 +40,7 @@ describe('BucketComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BucketComponent);
     component = fixture.componentInstance;
-    component.bucket = new Bucket('test bucket', 100, []);
+    component.bucket = {displayName: 'test bucket', allocationPercentage: 100, objectives: []};
     fixture.detectChanges();
   });
 

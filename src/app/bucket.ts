@@ -15,12 +15,10 @@
 import { Objective, objectiveResourcesAllocated, CommitmentType } from "./objective";
 import { Immutable } from './immutable';
 
-export class Bucket {
-  constructor(
-    public displayName: string,
-    public allocationPercentage: number,
-    public objectives: Objective[],
-  ) {}
+export interface Bucket {
+  displayName: string,
+  allocationPercentage: number,
+  objectives: Objective[],
 };
 
 /**
@@ -37,7 +35,7 @@ export function bucketResourcesAllocated(bucket: Immutable<Bucket>): number {
  * Sum of resources allocated to committed resources within the bucket.
  * Not a member function to avoid problems with JSON (de)serialization.
  */
-export function bucketCommittedResourcesAllocated(bucket: Bucket): number {
+export function bucketCommittedResourcesAllocated(bucket: Immutable<Bucket>): number {
   return bucket.objectives.filter(o => o.commitmentType == CommitmentType.Committed)
       .map(objectiveResourcesAllocated)
       .reduce((sum, current) => sum + current, 0);

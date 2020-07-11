@@ -15,7 +15,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Bucket, bucketResourcesAllocated } from '../bucket';
+import { Bucket } from '../bucket';
 import { Period, periodResourcesAllocated } from '../period';
 import { Team } from '../team';
 import { StorageService } from '../storage.service';
@@ -26,10 +26,11 @@ import { EditPeriodDialogComponent, EditPeriodDialogData } from '../edit-period-
 import { catchError, debounceTime } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
 import { Person } from '../person';
-import { CommitmentType, Objective } from '../objective';
+import { CommitmentType, Objective, ObjectiveGroup, ObjectiveTag } from '../objective';
 import { Assignment } from '../assignment';
 import { AggregateBy } from '../assignments-classify/assignments-classify.component';
 import { ThemePalette } from '@angular/material/core';
+import { Immutable } from '../immutable';
 
 @Component({
   selector: 'app-period',
@@ -37,8 +38,8 @@ import { ThemePalette } from '@angular/material/core';
   styleUrls: ['./period.component.css'],
 })
 export class PeriodComponent implements OnInit {
-  team?: Team;
-  period?: Period;
+  team?: Immutable<Team>;
+  period?: Immutable<Period>;
   isEditingEnabled: boolean = false;
   showOrderButtons: boolean = false;
   eventsRequiringSave = new Subject<any>();
@@ -120,7 +121,7 @@ export class PeriodComponent implements OnInit {
             (sum, current) => sum + current, 0);
   }
 
-  sumAssignmentValByPerson(objPred: (o: Objective) => boolean, valFunc: (a: Assignment) => number): Map<string, number> {
+  sumAssignmentValByPerson(objPred: (o: Immutable<Objective>) => boolean, valFunc: (a: Immutable<Assignment>) => number): ReadonlyMap<string, number> {
     let result: Map<string, number> = new Map();
     this.period!.buckets.forEach(bucket => {
       bucket.objectives.forEach(objective => {
@@ -138,24 +139,24 @@ export class PeriodComponent implements OnInit {
     return result;
   }
 
-  peopleAllocations(): Map<string, number> {
+  peopleAllocations(): ReadonlyMap<string, number> {
     return this.sumAssignmentValByPerson(o => true, (a: Assignment) => a.commitment);
   }
 
-  peopleCommittedAllocations(): Map<string, number> {
+  peopleCommittedAllocations(): ReadonlyMap<string, number> {
     return this.sumAssignmentValByPerson(
-      (o: Objective) => o.commitmentType == CommitmentType.Committed,
-      (a: Assignment) => a.commitment);
+      (o: Immutable<Objective>) => o.commitmentType == CommitmentType.Committed,
+      (a: Immutable<Assignment>) => a.commitment);
   }
 
-  peopleAssignmentCounts(): Map<string, number> {
+  peopleAssignmentCounts(): ReadonlyMap<string, number> {
     return this.sumAssignmentValByPerson(o => true, a => 1);
   }
 
   /**
    * Amount of unallocated time for each person
    */
-  unallocatedTime(): Map<string,number> {
+  unallocatedTime(): ReadonlyMap<string, number> {
     let result = new Map();
     this.period!.people.forEach(p => result.set(p.id, p.availability));
     this.period!.buckets.forEach(b => {
@@ -200,7 +201,7 @@ export class PeriodComponent implements OnInit {
     return (this.committedAllocationRatio() * 100) > this.period!.maxCommittedPercentage;
   }
 
-  otherBuckets(bucket: Bucket): Bucket[] {
+  otherBuckets(bucket: Immutable<Bucket>): Immutable<Bucket>[] {
     return this.period!.buckets.filter(b => b !== bucket);
   }
 
@@ -231,34 +232,50 @@ export class PeriodComponent implements OnInit {
 
   renameGroup(groupType: string, oldName: string, newName: string): void {
     let changed = false;
+    let newBuckets: Immutable<Bucket>[] = [];
     this.period!.buckets.forEach(b => {
+      let newObjectives: Immutable<Objective>[] = [];
       b.objectives.forEach(o => {
+        let newGroups: Immutable<ObjectiveGroup>[] = [];
         o.groups.forEach(g => {
           if (g.groupType == groupType && g.groupName == oldName) {
-            g.groupName = newName;
+            newGroups.push({...g, groupName: newName});
             changed = true;
+          } else {
+            newGroups.push(g);
           }
         });
+        newObjectives.push({...o, groups: newGroups});
       });
+      newBuckets.push({...b, objectives: newObjectives});
     });
     if (changed) {
+      this.period = {...this.period!, buckets: newBuckets};
       this.save();
     }
   }
 
   renameTag(oldName: string, newName: string) {
     let changed = false;
+    let newBuckets: Immutable<Bucket>[] = [];
     this.period!.buckets.forEach(b => {
+      let newObjectives: Immutable<Objective>[] = [];
       b.objectives.forEach(o => {
+        let newTags: Immutable<ObjectiveTag>[] = [];
         o.tags.forEach(t => {
           if (t.name == oldName) {
-            t.name = newName;
+            newTags.push({...t, name: newName});
             changed = true;
+          } else {
+            newTags.push(t);
           }
         });
+        newObjectives.push({...o, tags: newTags});
       });
+      newBuckets.push({...b, objectives: newObjectives});
     });
     if (changed) {
+      this.period = {...this.period!, buckets: newBuckets};
       this.save();
     }
   }
@@ -270,7 +287,8 @@ export class PeriodComponent implements OnInit {
       catchError(error => {
         this.snackBar.open('Could not load team "' + teamId + '": ' + error.error, 'Dismiss');
         console.log(error);
-        return of(new Team('', ''));
+        let t: Team = {id: '', displayName: ''};
+        return of(t);
       })
     ).subscribe(team => this.team = team);
 
@@ -303,15 +321,26 @@ export class PeriodComponent implements OnInit {
     this.eventsRequiringSave.next();
   }
 
+  onPeopleChanged(people: Immutable<Person>[]): void {
+    this.period = {...this.period!, people: people};
+    this.save();
+  }
+
   deletePerson(person: Person): void {
     // Deleting a person requires ensuring their assignments are deleted as well
     const index = this.period!.people.findIndex(p => p === person);
-    this.period!.people.splice(index, 1);
+    const newPeople: Immutable<Person>[] = [...this.period!.people];
+    newPeople.splice(index, 1);
+    const newBuckets: Immutable<Bucket>[] = [];
     this.period!.buckets.forEach(b => {
+      const newObjectives: Immutable<Objective>[] = [];
       b.objectives.forEach(o => {
-        o.assignments = o.assignments.filter(a => a.personId != person.id);
+        const newAssignments = o.assignments.filter(a => a.personId != person.id);
+        newObjectives.push({...o, assignments: newAssignments});
       });
+      newBuckets.push({...b, objectives: newObjectives});
     });
+    this.period = {...this.period!, people: newPeople, buckets: newBuckets};
     this.save();
   }
 
@@ -333,7 +362,7 @@ export class PeriodComponent implements OnInit {
     ).subscribe(updateResponse => {
       if (updateResponse) {
         this.snackBar.open('Saved', '', {duration: 2000});
-        this.period!.lastUpdateUUID = updateResponse.lastUpdateUUID;
+        this.period = {...this.period!, lastUpdateUUID: updateResponse.lastUpdateUUID};
       }
     });
   }
@@ -347,8 +376,9 @@ export class PeriodComponent implements OnInit {
       okAction: 'OK', allowEditID: false,
     };
     const dialogRef = this.dialog.open(EditPeriodDialogComponent, {data: dialogData});
-    dialogRef.afterClosed().subscribe(ok => {
-      if (ok) {
+    dialogRef.afterClosed().subscribe((newPeriod?: Immutable<Period>) => {
+      if (newPeriod) {
+        this.period = newPeriod;
         this.save();
       }
     });
@@ -359,33 +389,45 @@ export class PeriodComponent implements OnInit {
       return;
     }
     const dialogData: EditBucketDialogData = {
-      bucket: new Bucket('', 0, []),
+      bucket: {displayName: '', allocationPercentage: 0, objectives: []},
       okAction: 'Add', allowCancel: true, title: 'Add bucket'};
     const dialogRef = this.dialog.open(EditBucketDialogComponent, {data: dialogData});
     dialogRef.afterClosed().subscribe(bucket => {
       if (!bucket) {
         return;
       }
-      this.period!.buckets.push(bucket);
+      this.period = {...this.period!, buckets: this.period!.buckets.concat([bucket])};
       this.save();
     });
   }
 
-  moveBucketUpOne(bucket: Bucket): void {
+  moveBucketUpOne(bucket: Immutable<Bucket>): void {
     let index = this.period!.buckets.findIndex(b => b === bucket);
+    let newBuckets: Immutable<Bucket>[] = [...this.period!.buckets];
     if (index > 0) {
-      this.period!.buckets[index] = this.period!.buckets[index - 1];
-      this.period!.buckets[index - 1] = bucket;
+      newBuckets[index] = newBuckets[index - 1];
+      newBuckets[index - 1] = bucket;
     }
+    this.period = {...this.period!, buckets: newBuckets};
     this.save();
   }
 
-  moveBucketDownOne(bucket: Bucket): void {
+  moveBucketDownOne(bucket: Immutable<Bucket>): void {
     let index = this.period!.buckets.findIndex(b => b === bucket);
+    let newBuckets: Immutable<Bucket>[] = [...this.period!.buckets];
     if (index >= 0 && index < this.period!.buckets.length - 1) {
-      this.period!.buckets[index] = this.period!.buckets[index + 1];
-      this.period!.buckets[index + 1] = bucket;
+      newBuckets[index] = newBuckets[index + 1];
+      newBuckets[index + 1] = bucket;
     }
+    this.period = {...this.period!, buckets: newBuckets};
+    this.save();
+  }
+
+  onBucketChanged(oldBucket: Immutable<Bucket>, newBucket: Immutable<Bucket>): void {
+    this.period = {
+      ...this.period!,
+      buckets: this.period!.buckets.map(b => (b === oldBucket) ? newBucket : b),
+    };
     this.save();
   }
 }
