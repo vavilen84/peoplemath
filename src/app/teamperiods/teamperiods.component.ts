@@ -81,7 +81,7 @@ export class TeamPeriodsComponent implements OnInit {
       })
     ).subscribe((periods?: Period[]) => {
       if (periods) {
-        this.periods = periods.map(p => new ImmutablePeriod(p));
+        this.periods = periods.map(p => ImmutablePeriod.fromPeriod(p));
       } else {
         this.periods = undefined;
       }
@@ -229,7 +229,7 @@ export class TeamPeriodsComponent implements OnInit {
     ).subscribe(updateResponse => {
       if (updateResponse) {
         period.lastUpdateUUID = updateResponse.lastUpdateUUID;
-        this.periods = this.periods!.concat([new ImmutablePeriod(period)]);
+        this.periods = this.periods!.concat([ImmutablePeriod.fromPeriod(period)]);
       }
     });
   }
